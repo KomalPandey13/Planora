@@ -1,0 +1,74 @@
+:root {
+  /* Colors */
+  --bg-page: #FAF8FF;
+  --bg-surface: #FFFFFF;
+  --bg-surface-subtle: #F8FAFC;
+  --bg-hero: linear-gradient(135deg, #F3E8FF 0%, #FAF8FF 50%, #EDE9FE 100%);
+  
+  /* Brand Violet */
+  --primary-violet: #6D28D9;
+  --primary-hover: #5B21B6;
+  --primary-light: #7C3AED;
+  --primary-gradient: linear-gradient(135deg, #6D28D9 0%, #7C3AED 100%);
+  
+  /* Accent Lavender */
+  --accent-lavender: #EDE9FE;
+  --accent-text: #5B21B6;
+  --accent-border: #DDD6FE;
+  
+  /* Text */
+  --text-primary: #1E1B4B;
+  --text-secondary: #475569;
+  --text-muted: #64748B;
+  --text-light: #94A3B8;
+  --text-white: #FFFFFF;
+  
+  /* Borders */
+  --border-color: #E2E8F0;
+  --border-focus: #6D28D9;
+  
+  /* Status Badges */
+  --badge-free-bg: #DCFCE7;
+  --badge-free-text: #166534;
+  --badge-paid-bg: #FEF3C7;
+  --badge-paid-text: #92400E;
+  --badge-category-bg: #F3E8FF;
+  --badge-category-text: #6D28D9;
+  
+  /* Feedback */
+  --danger-bg: #FEE2E2;
+  --danger-text: #991B1B;
+  --danger-border: #FCA5A5;
+  --success-bg: #DCFCE7;
+  --success-text: #166534;
+  --success-border: #86EFAC;
+  
+  /* Typography */
+  --font-heading: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-body: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  
+  /* Shadows */
+  --shadow-sm: 0 1px 3px rgba(30, 27, 75, 0.05);
+  --shadow-md: 0 4px 14px rgba(109, 40, 217, 0.07);
+  --shadow-lg: 0 10px 30px rgba(109, 40, 217, 0.10);
+  --shadow-xl: 0 20px 40px rgba(109, 40, 217, 0.14);
+  --shadow-floating: 0 8px 24px -4px rgba(109, 40, 217, 0.16);
+  
+  /* Radii */
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-full: 9999px;
+  
+  /* Transitions */
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 400ms cubic-bezier(0.4, 0, 0.2, 1);
+  
+  /* Layout */
+  --container-max-width: 1240px;
+  --navbar-height: 72px;
+}
+
