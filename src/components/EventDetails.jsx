@@ -16,6 +16,8 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useEvents } from '../context/EventContext';
+import { PaymentModal } from './PaymentModal';
+import { TicketPassModal } from './TicketPassModal';
 import './EventDetails.css';
 
 export const EventDetails = ({ event }) => {
@@ -25,7 +27,9 @@ export const EventDetails = ({ event }) => {
   const location = useLocation();
 
   const [notification, setNotification] = useState(null);
-  const [showPassModal, setShowPassModal] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [showTicketModal, setShowTicketModal] = useState(false);
+  const [activeTicketData, setActiveTicketData] = useState(null);
 
   if (!event) {
     return (
@@ -60,14 +64,21 @@ export const EventDetails = ({ event }) => {
       return;
     }
 
+    // If event is Paid, open Payment Modal
+    if (event.isPaid && Number(event.price) > 0) {
+      setShowPaymentModal(true);
+      return;
+    }
+
+    // Free event: 1-click registration
     try {
       const { pass } = registerForEvent(event.id, user);
       registerUserForEvent(pass);
       setNotification({
         type: 'success',
-        message: 'Registration confirmed! Your digital entry pass is now active.'
+        message: 'Registration confirmed! Your free entry pass is now active.'
       });
-      setShowPassModal(true);
+      setActiveTicketData(pass);
     } catch (err) {
       setNotification({
         type: 'error',
@@ -76,16 +87,52 @@ export const EventDetails = ({ event }) => {
     }
   };
 
+  const handlePaymentSuccess = (bookingDetails) => {
+    try {
+      const { pass } = registerForEvent(event.id, user);
+      const combined = { ...pass, ...bookingDetails };
+      registerUserForEvent(combined);
+      setActiveTicketData(combined);
+      setNotification({
+        type: 'success',
+        message: 'Payment received! Your official event tickets are confirmed.'
+      });
+    } catch (err) {
+      setNotification({
+        type: 'error',
+        message: err.message || 'Payment confirmed, but booking registration encountered an issue.'
+      });
+    }
+  };
+
   const handleCancelRegistration = () => {
-    if (window.confirm('Are you sure you want to cancel your event registration? Your seat will be released.')) {
+    if (window.confirm('Are you sure you want to cancel your event registration? Your reserved seat will be released.')) {
       cancelEventRegistration(event.id);
       cancelUserEventRegistration(event.id);
-      setShowPassModal(false);
+      setShowTicketModal(false);
       setNotification({
         type: 'info',
         message: 'Your registration has been cancelled.'
       });
     }
+  };
+
+  const openTicketPass = () => {
+    const dataToView = activeTicketData || userPass || {
+      eventId: event.id,
+      eventTitle: event.title,
+      eventDate: event.date,
+      time: event.time,
+      venue: event.venue,
+      attendeeName: user?.name,
+      quantity: userPass?.quantity || 1,
+      totalAmount: userPass?.totalAmount || (event.isPaid ? event.price : 0),
+      bookingId: userPass?.bookingId || 'PLN-2026-X89K',
+      passCode: userPass?.passCode || 'PASS-HP26-9923',
+      status: 'Confirmed'
+    };
+    setActiveTicketData(dataToView);
+    setShowTicketModal(true);
   };
 
   const day = event.displayDate?.day || '24';
@@ -157,12 +204,12 @@ export const EventDetails = ({ event }) => {
                   Booking ID: {userPass.bookingId || 'PLN-2026-X89K'}
                 </div>
                 <p style={{ fontSize: '0.88rem', color: '#DDD6FE', marginBottom: '0.5rem' }}>
-                  Attendee: <strong>{user?.name}</strong> ({user?.email})
+                  Attendee: <strong>{user?.name}</strong> • Reserved: <strong>{userPass.quantity || 1} {userPass.quantity === 1 ? 'ticket' : 'tickets'}</strong>
                 </p>
-                <div className="pass-qr-sim">
+                <div className="pass-qr-sim" style={{ cursor: 'pointer' }} onClick={openTicketPass}>
                   <QrCode size={36} color="#6D28D9" />
                   <div>
-                    <div style={{ fontSize: '0.75rem', color: '#64748B' }}>Digital Verification Code</div>
+                    <div style={{ fontSize: '0.75rem', color: '#64748B' }}>Digital Verification Code (Click to open full pass)</div>
                     <div className="pass-qr-sim-code">{userPass.passCode || 'PLN-PASS-2026'}</div>
                   </div>
                 </div>
@@ -257,13 +304,24 @@ export const EventDetails = ({ event }) => {
                       <span>You&apos;re Registered!</span>
                     </div>
                     <p className="confirmed-subtext">
-                      Show your digital pass at the entrance on event day.
+                      {userPass?.quantity ? `${userPass.quantity} ticket(s) reserved. ` : ''}
+                      Show your QR pass at the entrance on event day.
                     </p>
                     <div className="confirmed-btn-group">
-                      <Link to="/profile" className="btn btn-secondary" style={{ width: '100%' }}>
+                      <button
+                        type="button"
+                        onClick={openTicketPass}
+                        className="btn btn-primary"
+                        style={{ width: '100%' }}
+                      >
                         <Ticket size={16} />
+                        <span>View Ticket Pass</span>
+                      </button>
+
+                      <Link to="/profile" className="btn btn-secondary" style={{ width: '100%' }}>
                         <span>View in My Profile</span>
                       </Link>
+
                       <button
                         type="button"
                         onClick={handleCancelRegistration}
@@ -282,7 +340,13 @@ export const EventDetails = ({ event }) => {
                     disabled={event.availableSeats <= 0}
                   >
                     <Ticket size={18} />
-                    <span>{event.availableSeats <= 0 ? 'Fully Booked' : 'Register Now'}</span>
+                    <span>
+                      {event.availableSeats <= 0
+                        ? 'Fully Booked'
+                        : event.isPaid && Number(event.price) > 0
+                        ? `Book Ticket • ₹${event.price}`
+                        : 'Register Now (Free)'}
+                    </span>
                   </button>
                 )}
               </div>
@@ -290,7 +354,30 @@ export const EventDetails = ({ event }) => {
           </div>
         </div>
       </div>
+
+      {/* Payment Checkout Modal for Paid Events */}
+      {showPaymentModal && (
+        <PaymentModal
+          event={event}
+          user={user}
+          isOpen={showPaymentModal}
+          onClose={() => setShowPaymentModal(false)}
+          onPaymentSuccess={handlePaymentSuccess}
+          onViewTicket={(ticketInfo) => {
+            setActiveTicketData(ticketInfo);
+            setShowTicketModal(true);
+          }}
+        />
+      )}
+
+      {/* Sleek Boarding-Pass Style Ticket Modal */}
+      {showTicketModal && (
+        <TicketPassModal
+          isOpen={showTicketModal}
+          onClose={() => setShowTicketModal(false)}
+          ticketData={activeTicketData || userPass}
+        />
+      )}
     </div>
   );
 };
-

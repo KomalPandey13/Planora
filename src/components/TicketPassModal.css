@@ -1,0 +1,221 @@
+.ticket-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(30, 27, 75, 0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 2100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  overflow-y: auto;
+  animation: fadeIn 0.25s ease-out;
+}
+
+.ticket-modal-wrapper {
+  width: 100%;
+  max-width: 620px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+/* Boarding Pass Ticket */
+.boarding-pass-card {
+  background: #FFFFFF;
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  box-shadow: 0 25px 60px -15px rgba(109, 40, 217, 0.35);
+  border: 1px solid var(--border-color);
+  position: relative;
+}
+
+/* Ticket Header Banner */
+.ticket-header-banner {
+  background: var(--primary-gradient);
+  color: #FFFFFF;
+  padding: 1.75rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+}
+
+.ticket-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 1.25rem;
+  letter-spacing: -0.02em;
+}
+
+.ticket-badge-pill {
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(6px);
+  padding: 0.3rem 0.85rem;
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/* Ticket Body Grid */
+.ticket-body-grid {
+  padding: 2rem;
+  display: grid;
+  grid-template-columns: 1fr 150px;
+  gap: 2rem;
+  align-items: center;
+}
+
+.ticket-left-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.ticket-event-title {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1.25;
+}
+
+.ticket-meta-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.ticket-info-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.ticket-info-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  margin-bottom: 0.2rem;
+}
+
+.ticket-info-value {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.ticket-info-columns-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+/* QR Code Section */
+.ticket-qr-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.65rem;
+  padding-left: 1.5rem;
+  border-left: 2px dashed #E2E8F0;
+}
+
+.ticket-qr-box {
+  background: #FAF8FF;
+  border: 1px solid var(--accent-border);
+  border-radius: var(--radius-md);
+  padding: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(109, 40, 217, 0.08);
+}
+
+.ticket-qr-code-text {
+  font-family: monospace;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--primary-violet);
+  letter-spacing: 0.05em;
+}
+
+/* Ticket Stub Footer */
+.ticket-stub-footer {
+  background: #FAF8FF;
+  border-top: 1px solid var(--border-color);
+  padding: 1rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+}
+
+.ticket-booking-code {
+  font-family: monospace;
+  font-weight: 700;
+  color: var(--primary-violet);
+}
+
+/* Modal Bottom Action Controls */
+.ticket-modal-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+
+/* Print Styling */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  .ticket-modal-backdrop,
+  .boarding-pass-card,
+  .boarding-pass-card * {
+    visibility: visible;
+  }
+
+  .ticket-modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: transparent;
+    padding: 0;
+  }
+
+  .ticket-modal-actions,
+  .payment-close-btn {
+    display: none !important;
+  }
+
+  .boarding-pass-card {
+    box-shadow: none;
+    border: 1px solid #000;
+  }
+}
+
+@media (max-width: 600px) {
+  .ticket-body-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .ticket-qr-section {
+    border-left: none;
+    border-top: 2px dashed #E2E8F0;
+    padding-left: 0;
+    padding-top: 1.5rem;
+  }
+}

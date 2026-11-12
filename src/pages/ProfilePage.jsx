@@ -16,6 +16,7 @@ import {
 import { useAuth } from '../context/AuthContext';
 import { useEvents } from '../context/EventContext';
 import { EventCard } from '../components/EventCard';
+import { TicketPassModal } from '../components/TicketPassModal';
 import './ProfilePage.css';
 
 export const ProfilePage = () => {
@@ -23,6 +24,7 @@ export const ProfilePage = () => {
   const { events, getEventById, cancelEventRegistration, deleteEvent } = useEvents();
 
   const [activeTab, setActiveTab] = useState('registered'); // 'registered' | 'hosted'
+  const [ticketModalPass, setTicketModalPass] = useState(null);
 
   const registeredPasses = user?.registeredEvents || [];
   
@@ -44,6 +46,9 @@ export const ProfilePage = () => {
     if (window.confirm('Are you sure you want to cancel your registration? Your reserved seat will be released.')) {
       cancelEventRegistration(eventId);
       cancelUserEventRegistration(eventId);
+      if (ticketModalPass?.eventId === eventId) {
+        setTicketModalPass(null);
+      }
     }
   };
 
@@ -119,6 +124,7 @@ export const ProfilePage = () => {
                   const dateStr = eventDetails?.date || pass.eventDate;
                   const venueStr = eventDetails?.venue || pass.venue || 'Campus Venue';
                   const timeStr = eventDetails?.time || pass.time || '10:00 AM';
+                  const qty = pass.quantity || 1;
 
                   return (
                     <div key={pass.eventId} className="registered-item-card">
@@ -138,6 +144,10 @@ export const ProfilePage = () => {
                             <MapPin size={15} color="var(--primary-violet)" />
                             <span>{venueStr}</span>
                           </span>
+                          <span className="registered-meta-tag">
+                            <Ticket size={15} color="var(--primary-violet)" />
+                            <span>{qty} {qty === 1 ? 'ticket' : 'tickets'}</span>
+                          </span>
                         </div>
 
                         <div className="pass-credentials-strip">
@@ -149,6 +159,29 @@ export const ProfilePage = () => {
                       </div>
 
                       <div className="registered-actions-group">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setTicketModalPass({
+                              ...pass,
+                              eventTitle: title,
+                              eventDate: dateStr,
+                              time: timeStr,
+                              venue: venueStr,
+                              attendeeName: user?.name,
+                              quantity: qty,
+                              totalAmount: pass.totalAmount || 0,
+                              bookingId: pass.bookingId || 'PLN-2026-X89K',
+                              passCode: pass.passCode || 'PASS-982713'
+                            })
+                          }
+                          className="btn btn-primary"
+                          style={{ padding: '0.55rem 1rem', fontSize: '0.88rem' }}
+                        >
+                          <Ticket size={15} />
+                          <span>View Ticket Pass</span>
+                        </button>
+
                         <Link
                           to={`/events/${pass.eventId}`}
                           className="btn btn-secondary"
@@ -228,7 +261,15 @@ export const ProfilePage = () => {
           </div>
         )}
       </div>
+
+      {/* Ticket Pass Modal */}
+      {ticketModalPass && (
+        <TicketPassModal
+          isOpen={Boolean(ticketModalPass)}
+          onClose={() => setTicketModalPass(null)}
+          ticketData={ticketModalPass}
+        />
+      )}
     </div>
   );
 };
-
