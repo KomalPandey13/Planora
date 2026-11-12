@@ -460,3 +460,4 @@ export const PaymentModal = ({ event, user, isOpen, onClose, onPaymentSuccess, o
     </div>
   );
 };
+

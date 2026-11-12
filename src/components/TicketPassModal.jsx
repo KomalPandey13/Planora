@@ -226,3 +226,4 @@ export const TicketPassModal = ({ isOpen, onClose, ticketData }) => {
     </div>
   );
 };
+
