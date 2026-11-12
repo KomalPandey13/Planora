@@ -32,12 +32,16 @@ export async function hashPassword(password) {
 }
 
 /**
- * Sanitizes input string to prevent XSS / malicious injection
+ * Sanitizes input string to prevent XSS / script injection in payer names, UPI IDs, and text fields
  * @param {string} input - Raw user input
  * @returns {string} Sanitized string
  */
 export function sanitizeInput(input) {
   if (typeof input !== 'string') return '';
+  
+  // Strip script blocks and HTML tags
+  let cleaned = input.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
+  cleaned = cleaned.replace(/<[^>]*>/g, '');
   
   const map = {
     '&': '&amp;',
@@ -48,7 +52,7 @@ export function sanitizeInput(input) {
     '/': '&#x2F;'
   };
   
-  return input.replace(/[&<>"'/]/g, (char) => map[char] || char).trim();
+  return cleaned.replace(/[&<>"'/]/g, (char) => map[char] || char).trim();
 }
 
 /**
@@ -146,4 +150,3 @@ export function compressImage(file, maxWidth = 800, quality = 0.75) {
     reader.readAsDataURL(file);
   });
 }
-

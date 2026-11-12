@@ -45,15 +45,49 @@ export const AuthProvider = ({ children }) => {
     return elevated;
   }, [user]);
 
-  const registerUserForEvent = useCallback((pass) => {
-    if (!user) return;
-    const existingIndex = user.registeredEvents?.findIndex((p) => p.eventId === pass.eventId);
+  /**
+   * Registers user for an event and stores rich booking metadata
+   * Supports both Free events (totalAmount: 0, paymentMethod: "Free Entry")
+   * and Paid events (quantity, totalAmount, transactionId, method) with 100% backward compatibility.
+   */
+  const registerForEvent = useCallback((eventId, bookingDetails = {}) => {
+    if (!user) return null;
+
+    const bookingId = bookingDetails.bookingId || `PLN-2026-${Math.floor(1000 + Math.random() * 9000)}`;
+    const quantity = Number(bookingDetails.quantity) || 1;
+    const totalAmount = bookingDetails.totalAmount !== undefined ? Number(bookingDetails.totalAmount) : 0;
+    const paymentMethod = bookingDetails.paymentMethod || bookingDetails.method || (totalAmount > 0 ? 'Online Payment' : 'Free Entry');
+    const transactionId = bookingDetails.transactionId || (totalAmount > 0 ? `TXN${Date.now()}` : 'FREE-ADMISSION');
+    const registeredAt = bookingDetails.paidAt || bookingDetails.registeredAt || new Date().toISOString();
+    const passCode = bookingDetails.passCode || `PASS-${Math.floor(100000 + Math.random() * 900000)}`;
+
+    const passRecord = {
+      eventId,
+      eventTitle: bookingDetails.eventTitle || '',
+      eventDate: bookingDetails.eventDate || '',
+      displayDate: bookingDetails.displayDate || null,
+      time: bookingDetails.time || '',
+      venue: bookingDetails.venue || '',
+      priceDisplay: bookingDetails.priceDisplay || (totalAmount > 0 ? `₹${totalAmount}` : 'Free'),
+      bookingId,
+      transactionId,
+      quantity,
+      totalAmount,
+      paymentMethod,
+      registeredAt,
+      passCode,
+      attendeeName: user.name,
+      attendeeEmail: user.email,
+      status: 'Confirmed'
+    };
+
+    const existingIndex = user.registeredEvents?.findIndex((p) => p.eventId === eventId);
     let updatedRegistrations = user.registeredEvents ? [...user.registeredEvents] : [];
 
     if (existingIndex >= 0) {
-      updatedRegistrations[existingIndex] = pass;
+      updatedRegistrations[existingIndex] = { ...updatedRegistrations[existingIndex], ...passRecord };
     } else {
-      updatedRegistrations.push(pass);
+      updatedRegistrations.push(passRecord);
     }
 
     const updatedUser = {
@@ -63,7 +97,14 @@ export const AuthProvider = ({ children }) => {
 
     authService.updateUser(updatedUser);
     setUser(updatedUser);
+    return passRecord;
   }, [user]);
+
+  // Backward compatible alias for existing passes
+  const registerUserForEvent = useCallback((pass) => {
+    if (!pass) return null;
+    return registerForEvent(pass.eventId, pass);
+  }, [registerForEvent]);
 
   const cancelUserEventRegistration = useCallback((eventId) => {
     if (!user) return;
@@ -126,6 +167,7 @@ export const AuthProvider = ({ children }) => {
     register,
     logout,
     elevateToOrganizer,
+    registerForEvent,
     registerUserForEvent,
     cancelUserEventRegistration,
     addHostedEventId,
@@ -144,4 +186,3 @@ export const useAuth = () => {
   }
   return context;
 };
-
